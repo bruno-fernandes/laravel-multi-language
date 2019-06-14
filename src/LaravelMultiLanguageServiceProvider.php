@@ -21,7 +21,7 @@ class LaravelMultiLanguageServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/config.php' => config_path('laravel-multi-language.php'),
+                __DIR__. '/../config/laravel-multi-language.php' => config_path('laravel-multi-language.php'),
             ], 'config');
 
             // Publishing the views.
@@ -50,7 +50,7 @@ class LaravelMultiLanguageServiceProvider extends ServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'laravel-multi-language');
+        $this->mergeConfigFrom(__DIR__. '/../config/laravel-multi-language.php', 'laravel-multi-language');
 
         // Register the main class to use with the facade
         $this->app->singleton('laravel-multi-language', function () {
