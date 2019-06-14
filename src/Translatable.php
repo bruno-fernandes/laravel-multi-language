@@ -2,18 +2,28 @@
 
 namespace BrunoFernandes\LaravelMultiLanguage;
 
+use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Builder;
+use BrunoFernandes\LaravelMultiLanguage\Exceptions\ModelTranslationAlreadyExistsException;
 
 trait Translatable
 {
     /**
-     * On model creation set original_id field
+     *
      *
      * @return void
      */
     public static function bootTranslatable()
     {
+        static::creating(function ($model) {
+            // set default language if not set
+            if (!$model->{$model->getLangKey()}) {
+                $model->{$model->getLangKey()} = app()->getLocale();
+            }
+        });
+
         static::created(function ($model) {
+            // On model creation set original_id field
             if (!$model->{$model->getForeignKey()}) {
                 $model->{$model->getForeignKey()} = $model->id;
                 $model->save();
@@ -45,6 +55,31 @@ trait Translatable
     public function translations()
     {
         return $this->hasMany(get_class($this), $this->getForeignKey(), $this->getForeignKey());
+    }
+
+    /**
+     * Translate model to another language
+     *
+     * @param [type] $lang
+     * @param array $data
+     * @return Illuminate\Database\Eloquent\Model
+     */
+    public function translateTo($lang, $data = [])
+    {
+        $excludedFields = ['id', 'lang', 'original_id', 'created_at', 'updated_at'];
+        $newLangData = ['lang' => $lang, 'original_id' => $this->id];
+
+        $data = array_merge(
+            Arr::except($this->toArray(), $excludedFields), // original data
+            Arr::except($data, $excludedFields), // passed data that overides the original
+            $newLangData
+        );
+
+        if ($this->lang == $lang || self::where($newLangData)->exists()) {
+            throw new ModelTranslationAlreadyExistsException('Translation already exists.', 1);
+        }
+
+        return self::create($data);
     }
 
     /*
