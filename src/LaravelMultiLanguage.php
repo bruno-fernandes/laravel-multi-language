@@ -2,7 +2,12 @@
 
 namespace BrunoFernandes\LaravelMultiLanguage;
 
+use Illuminate\Support\Facades\App;
+
 class LaravelMultiLanguage
 {
-    // Build your next great package.
+    public function getLocale()
+    {
+        return App::getLocale();
+    }
 }
