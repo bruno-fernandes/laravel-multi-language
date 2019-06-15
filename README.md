@@ -4,6 +4,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/bruno-fernandes/laravel-multi-language.svg?style=flat-square)](https://packagist.org/packages/bruno-fernandes/laravel-multi-language)
 [![CircleCI](https://circleci.com/gh/bruno-fernandes/laravel-multi-language.svg?style=svg&circle-token=204e4d6fde62b9ba380ef4d513a568e20ace4090)](https://circleci.com/gh/bruno-fernandes/laravel-multi-language)
+[![CodeCoverage](https://codecov.io/gh/bruno-fernandes/laravel-multi-language/branch/master/graph/badge.svg)](https://codecov.io/github/bruno-fernandes/laravel-multi-language?branch=master)
 [![Quality Score](https://img.shields.io/scrutinizer/g/bruno-fernandes/laravel-multi-language.svg?style=flat-square)](https://scrutinizer-ci.com/g/bruno-fernandes/laravel-multi-language)
 [![Total Downloads](https://img.shields.io/packagist/dt/bruno-fernandes/laravel-multi-language.svg?style=flat-square)](https://packagist.org/packages/bruno-fernandes/laravel-multi-language)
 
