@@ -14,10 +14,10 @@ Simple approach to eloquent models translation. There are other packages that pr
 ### Key points:
 
 - easy to get up running on existing applications
-- all eloquent model fields are translable
+- all eloquent model fields are translatable
 - original can be created in any language
 - translations can be copied from original
-- translations can be associated later on
+- translations can be easily associated later on
 
 ## Installation
 
@@ -36,7 +36,7 @@ php artisan vendor:publish --provider="BrunoFernandes\LaravelMultiLanguage\Larav
 ## Usage
 
 ``` php
-// Import the Translate trait into the eloquent model model
+// Import the Translatable trait into the eloquent model
 use BrunoFernandes\LaravelMultiLanguage\Translatable;
 
 class Page extends Model
@@ -68,9 +68,21 @@ $englishPage = $page->translateTo('es', ['title' => 'Spanish title']);
 
 $originalPages = Page::onlyOriginals()->get();
 
-$pagesWithTranslationsLoaded = Page::lang('en')->withTranslations()->get();
+// the package will apply the lang scope by default, so only  
+// the current locale records are returned (it can be disable in the config file)
+$currentLocalePages = Page::get();
 
-// More usage samples to be added
+// if apply lang global scope is disabled you can use the lang scope as follow:
+$enPagesWithTranslations = Page::lang('en')->withTranslations()->get();
+// NOTE: always use withTranslations() rather than with('translations) as it is more efficient
+// using withTranslations() will exlude the current locale from the translations relationship
+
+// if you would like to remove a global scope for a given query,
+// you may use the  withoutGlobalScope method as follow:
+use BrunoFernandes\LaravelMultiLanguage\Scopes\LangScope;
+$allPagesOfAllLocales = Page::withoutGlobalScope(LangScope::class)->get();
+
+// TODO: add usage samples to be added
 ```
 
 ### Testing

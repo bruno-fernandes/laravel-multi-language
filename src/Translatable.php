@@ -3,7 +3,9 @@
 namespace BrunoFernandes\LaravelMultiLanguage;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Builder;
+use BrunoFernandes\LaravelMultiLanguage\Scopes\LangScope;
 use BrunoFernandes\LaravelMultiLanguage\Exceptions\ModelTranslationAlreadyExistsException;
 
 trait Translatable
@@ -18,7 +20,7 @@ trait Translatable
         static::creating(function ($model) {
             // set default language if not set
             if (!$model->{$model->getLangKey()}) {
-                $model->{$model->getLangKey()} = app()->getLocale();
+                $model->{$model->getLangKey()} = App::getLocale();
             }
         });
 
@@ -29,6 +31,10 @@ trait Translatable
                 $model->save();
             }
         });
+
+        if (config('laravel-multi-language.apply_lang_global_scope')) {
+            static::addGlobalScope(new LangScope);
+        }
     }
 
     /**
@@ -68,18 +74,21 @@ trait Translatable
     {
         $excludedFields = ['id', 'lang', 'original_id', 'created_at', 'updated_at'];
         $newLangData = ['lang' => $lang, 'original_id' => $this->id];
+        $originalData = Arr::except($this->toArray(), $excludedFields);
+        $data = Arr::except($data, $excludedFields); // clean up passed data
+        $data = array_merge($originalData, $data, $newLangData);
 
-        $data = array_merge(
-            Arr::except($this->toArray(), $excludedFields), // original data
-            Arr::except($data, $excludedFields), // passed data that overides the original
-            $newLangData
-        );
-
-        if ($this->lang == $lang || self::where($newLangData)->exists()) {
+        if ($this->lang == $lang || self::withoutGlobalScope(LangScope::class)->where($newLangData)->exists()) {
             throw new ModelTranslationAlreadyExistsException('Translation already exists.', 1);
         }
 
-        return self::create($data);
+        // TODO: add event here: model.translating
+
+        $translation =  self::create($data);
+
+        // TODO: add event here: model.translated
+
+        return $translation;
     }
 
     /*
@@ -90,8 +99,6 @@ trait Translatable
     public function scopeWithTranslations(Builder $query, $lang = null, $fields = [])
     {
         return $query->with(['translations' => function ($q) use ($lang, $fields) {
-            // $q->whereRaw('`'.$this->getTable().'`.`id` != `'.$this->getTable().'`.`id`');
-            // $q->notLang($lang)->select(['id', 'lang', 'original_id', 'first_name']);
             $q->notLang($lang, $fields);
         }]);
     }
@@ -104,7 +111,7 @@ trait Translatable
      */
     public function scopeLang(Builder $query, $lang = null)
     {
-        return $query->where($this->getLangKey(), $lang ?: app()->getLocale());
+        return $query->where($this->getLangKey(), $lang ?: App::getLocale());
     }
 
     /**
@@ -115,8 +122,8 @@ trait Translatable
      */
     public function scopeNotLang(Builder $query, $lang = null)
     {
-        if (!$lang) $lang = app()->getLocale();
-        return $query->where($this->getLangKey(), '!=', $lang);
+        return $query->where($this->getLangKey(), '!=', $lang ?: App::getLocale())
+            ->withoutGlobalScope(LangScope::class);
     }
 
     /**
