@@ -69,7 +69,7 @@ trait Translatable
     public function translateTo($lang, $data = [])
     {
         $excludedFields = [$this->getKeyName(), $this->getLangKey(), $this->getForeignKey(), 'created_at', 'updated_at'];
-        $newLangData = [$this->getLangKey() => $lang, $this->getForeignKey() => $this->original_id];
+        $newLangData = [$this->getLangKey() => $lang, $this->getForeignKey() => $this->{$this->getForeignKey()}];
         $originalData = Arr::except($this->toArray(), $excludedFields);
         $data = Arr::except($data, $excludedFields); // clean up passed data
         $data = array_merge($originalData, $data, $newLangData);
@@ -101,7 +101,7 @@ trait Translatable
 
         return self::withoutGlobalScope(LangScope::class)
             ->where($this->getLangKey(), $lang)
-            ->where($this->getForeignKey(), $this->original_id)
+            ->where($this->getForeignKey(), $this->{$this->getForeignKey()})
             ->exists();
     }
 
@@ -115,7 +115,7 @@ trait Translatable
     {
         return self::withoutGlobalScope(LangScope::class)
             ->where($this->getLangKey(), $lang)
-            ->where($this->getForeignKey(), $this->original_id)
+            ->where($this->getForeignKey(), $this->{$this->getForeignKey()})
             ->first();
     }
 
