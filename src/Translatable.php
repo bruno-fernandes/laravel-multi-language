@@ -10,6 +10,8 @@ use BrunoFernandes\LaravelMultiLanguage\Exceptions\ModelTranslationAlreadyExists
 
 trait Translatable
 {
+    abstract public function getKeyName();
+
     /**
      * @return void
      */
@@ -91,32 +93,38 @@ trait Translatable
      * Checks if record has a  translation
      *
      * @param String $lang
-     * @return Model|null
+     * @return Boolean
      */
-    public function hasTranslation($lang)
+    public function hasTranslation($lang): bool
     {
         if ($this->lang == $lang) {
             return true;
         }
+        return $this->getTranslationBaseQuery($lang)->exists();
+    }
 
+    /**
+     * Undocumented function
+     *
+     * @param String $lang
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    private function getTranslationBaseQuery($lang): Builder
+    {
         return self::withoutGlobalScope(LangScope::class)
             ->where($this->getLangKey(), $lang)
-            ->where($this->getForeignKey(), $this->{$this->getForeignKey()})
-            ->exists();
+            ->where($this->getForeignKey(), $this->{$this->getForeignKey()});
     }
 
     /**
      * Get translation
      *
      * @param String $lang
-     * @return Model|null
+     * @return Illuminate\Database\Eloquent\Model|null
      */
     public function translation($lang)
     {
-        return self::withoutGlobalScope(LangScope::class)
-            ->where($this->getLangKey(), $lang)
-            ->where($this->getForeignKey(), $this->{$this->getForeignKey()})
-            ->first();
+        return $this->getTranslationBaseQuery($lang)->first();
     }
 
     /*
