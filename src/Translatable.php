@@ -11,11 +11,9 @@ use BrunoFernandes\LaravelMultiLanguage\Exceptions\ModelTranslationAlreadyExists
 trait Translatable
 {
     /**
-     *
-     *
      * @return void
      */
-    public static function bootTranslatable()
+    public static function bootTranslatable(): void
     {
         static::creating(function ($model) {
             // set default language if not set
@@ -25,7 +23,7 @@ trait Translatable
         });
 
         static::created(function ($model) {
-            // On model creation set original_id field
+            // Set original field id when created
             if (!$model->{$model->getForeignKey()}) {
                 $model->{$model->getForeignKey()} = $model->id;
                 $model->save();
@@ -40,19 +38,17 @@ trait Translatable
     /**
      * @return string
      */
-    public function getLangKey()
+    public function getLangKey(): String
     {
-        // default: lang
-        return config('laravel-multi-language.lang_key');
+        return config('laravel-multi-language.lang_key', 'lang');
     }
 
     /**
      * @return string
      */
-    public function getForeignKey()
+    public function getForeignKey(): String
     {
-        // default: original_id
-        return config('laravel-multi-language.foreign_key');
+        return config('laravel-multi-language.foreign_key', 'original_id');
     }
 
     /**
@@ -66,19 +62,19 @@ trait Translatable
     /**
      * Translate model to another language
      *
-     * @param [type] $lang
+     * @param String $lang
      * @param array $data
      * @return Illuminate\Database\Eloquent\Model
      */
     public function translateTo($lang, $data = [])
     {
         $excludedFields = ['id', 'lang', 'original_id', 'created_at', 'updated_at'];
-        $newLangData = ['lang' => $lang, 'original_id' => $this->id];
+        $newLangData = ['lang' => $lang, 'original_id' => $this->original_id];
         $originalData = Arr::except($this->toArray(), $excludedFields);
         $data = Arr::except($data, $excludedFields); // clean up passed data
         $data = array_merge($originalData, $data, $newLangData);
 
-        if ($this->lang == $lang || self::withoutGlobalScope(LangScope::class)->where($newLangData)->exists()) {
+        if ($this->hasTranslation($lang)) {
             throw new ModelTranslationAlreadyExistsException('Translation already exists.', 1);
         }
 
@@ -89,6 +85,38 @@ trait Translatable
         // TODO: add event here: model.translated
 
         return $translation;
+    }
+
+    /**
+     * Checks if record has a  translation
+     *
+     * @param String $lang
+     * @return Model|null
+     */
+    public function hasTranslation($lang)
+    {
+        if ($this->lang == $lang) {
+            return true;
+        }
+
+        return self::withoutGlobalScope(LangScope::class)
+            ->where('lang', $lang)
+            ->where('original_id', $this->original_id)
+            ->exists();
+    }
+
+    /**
+     * Get translation
+     *
+     * @param String $lang
+     * @return Model|null
+     */
+    public function translation($lang)
+    {
+        return self::withoutGlobalScope(LangScope::class)
+            ->where('lang', $lang)
+            ->where('original_id', $this->original_id)
+            ->first();
     }
 
     /*
@@ -134,7 +162,6 @@ trait Translatable
      */
     public function scopeOnlyOriginal(Builder $query)
     {
-        // TODO: create tests
         return $query->whereRaw($this->getTable() . '.id = ' . $this->getTable() . '.' . $this->getForeignKey());
     }
 

@@ -86,6 +86,11 @@ $allPagesOfAllLocales = Page::withoutGlobalScope(LangScope::class)->get();
 // TODO: add usage samples to be added
 ```
 
+### Known issues
+
+When used with [Searchable package](https://github.com/nicolaslopezj/searchable) global scopes need to be removed and applied manually after the search method is used.
+
+
 ### Testing
 
 ``` bash

@@ -46,7 +46,7 @@ class TranslatableTest extends TestCase
     }
 
     /** @test */
-    public function model_is_translated_to_another_locale()
+    public function model_is_translated_from_original_to_another_locale()
     {
         $original = Page::create(['title' => 'English title']);
 
@@ -58,6 +58,20 @@ class TranslatableTest extends TestCase
         $this->assertEquals($title, $page->title);
 
         $this->assertDatabaseHas($page->getTable(), [$page->getLangKey() => 'es', 'title' => $title]);
+    }
+
+    /** @test */
+    public function model_is_translated_from_translation_to_another_locale()
+    {
+        $original = Page::create(['title' => 'English title']);
+        $translation = $original->translateTo('es', ['title' => 'Title in spanish']);
+        $translation2 = $translation->translateTo('pt', ['title' => 'Title in portuguese']);
+
+        $this->assertEquals($translation2->original_id, $original->id);
+        $this->assertEquals('pt', $translation2->lang);
+        $this->assertEquals('Title in portuguese', $translation2->title);
+
+        $this->assertDatabaseHas($translation2->getTable(), [$translation2->getLangKey() => 'pt', 'title' => 'Title in portuguese']);
     }
 
     /** @test */
@@ -148,5 +162,49 @@ class TranslatableTest extends TestCase
         $this->assertCount(2, $result);
         $this->assertEquals('en', $result[0]->lang);
         $this->assertEquals('es', $result[1]->lang);
+    }
+
+    /** @test */
+    public function gets_translation_from_original()
+    {
+        $original = Page::create(['title' => 'English title']);
+        $translation = $original->translateTo('es', ['title' => 'Spanish title']);
+
+        $result = $original->translation('es');
+
+        $this->assertEquals('es', $result->lang);
+    }
+
+    /** @test */
+    public function gets_original_from_translation()
+    {
+        $original = Page::create(['title' => 'English title']);
+        $translation = $original->translateTo('es', ['title' => 'Spanish title']);
+
+        $result = $translation->translation('en');
+
+        $this->assertEquals('en', $result->lang);
+    }
+
+    /** @test */
+    public function if_has_translation_from_original()
+    {
+        $original = Page::create(['title' => 'English title']);
+        $translation = $original->translateTo('es', ['title' => 'Spanish title']);
+
+        $result = $original->hasTranslation('es');
+
+        $this->assertTrue($result);
+    }
+
+    /** @test */
+    public function if_has_translation_from_translation()
+    {
+        $original = Page::create(['title' => 'English title']);
+        $translation = $original->translateTo('es', ['title' => 'Spanish title']);
+
+        $result = $translation->hasTranslation('en');
+
+        $this->assertTrue($result);
     }
 }
