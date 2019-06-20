@@ -52,8 +52,18 @@ class AddMultilanguageFieldsToPagesTable extends Migration
     public function up()
     {
         Schema::table('pages', function (Blueprint $table) {
-            $table->string('lang', 6)->default('en')->index()->after('id');
-            $table->integer('original_id')->unsigned()->nullable()->index()->after('id');
+            // Create columns
+            $table->string(config('laravel-multi-language.lang_key'), 6)
+                ->default('en')->index()->after('id');
+            $table->integer(config('laravel-multi-language.foreign_key'))
+                ->unsigned()->nullable()->index()->after('id');
+            
+            // Create composite unique index to prevent multiple
+            // records using the same lang key
+            $table->unique([
+                config('laravel-multi-language.foreign_key'), 
+                config('laravel-multi-language.lang_key')
+            ]);
         });
 
         // TODO: if there are already records on the table, create a migration to update
