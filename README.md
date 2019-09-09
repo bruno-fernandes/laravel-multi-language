@@ -98,7 +98,33 @@ $allPagesOfAllLocales = Page::withoutGlobalScope(LangScope::class)->get();
 
 ### Known issues
 
-When used with [Searchable package](https://github.com/nicolaslopezj/searchable) global scopes need to be removed and applied manually after the search method is used.
+- When used with [Searchable package](https://github.com/nicolaslopezj/searchable) global scopes need to be removed and applied manually after the search method is used.
+
+- when using hasOne relationships, if *foreign_key* and *local_key* are not set the LangScope (Global Scope) is applied to the relationship, if the relationship model is not translatable an error is thrown.
+
+```sql
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'live_players.original_id' in 'where clause' (SQL: select * from `live_players` where `live_players`.`original_id` in (35) and `live_players`.`deleted_at` is null) (View: /home/vagrant/code/resources/frontend/views/index.blade.php)
+```
+
+``` php
+// This does not work
+class Content extends Model
+{
+    public function livePlayer()
+    {
+        return $this->hasOne(LivePlayer::class);
+    }
+}
+
+// This works
+class Content extends Model
+{
+    public function livePlayer()
+    {
+        return $this->hasOne(LivePlayer::class, 'id', 'live_player_id');
+    }
+}
+```
 
 
 ### Testing
