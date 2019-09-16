@@ -61,6 +61,11 @@ trait Translatable
         return $this->hasMany(get_class($this), $this->getForeignKey(), $this->getForeignKey());
     }
 
+    // public function original()
+    // {
+    //     return $this->belongsTo(get_class($this), 'profile_id', 'id');
+    // }
+
     /**
      * Translate model to another language
      *
