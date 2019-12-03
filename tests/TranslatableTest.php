@@ -9,6 +9,7 @@ use BrunoFernandes\LaravelMultiLanguage\LaravelMultiLanguageServiceProvider;
 use BrunoFernandes\LaravelMultiLanguage\Exceptions\ModelTranslationAlreadyExistsException;
 use Illuminate\Support\Facades\Config;
 use BrunoFernandes\LaravelMultiLanguage\Scopes\LangScope;
+use Carbon\Carbon;
 
 class TranslatableTest extends TestCase
 {
@@ -48,7 +49,10 @@ class TranslatableTest extends TestCase
     /** @test */
     public function model_is_translated_from_original_to_another_locale()
     {
-        $original = Page::create(['title' => 'English title']);
+        $original = Page::create([
+            'title' => 'English title',
+            'published_at' => '2019-12-03T07:22:29+00:00'
+        ]);
 
         $title = 'Spanish title';
         $page = $original->translateTo($locale = 'es', $data = ['title' => $title]);
@@ -72,6 +76,25 @@ class TranslatableTest extends TestCase
         $this->assertEquals('Title in portuguese', $translation2->title);
 
         $this->assertDatabaseHas($translation2->getTable(), [$translation2->getLangKey() => 'pt', 'title' => 'Title in portuguese']);
+    }
+
+    /** @test */
+    public function model_is_translated_from_original_to_another_locale_and_excluded_fields_are_not_included()
+    {
+        $original = Page::create([
+            'title' => 'English title',
+            'published_at' => '2019-12-03T07:22:29+00:00'
+        ]);
+
+        $title = 'Spanish title';
+        $page = $original->translateTo($locale = 'es', $data = ['title' => $title]);
+
+        $this->assertEquals($page->original_id, $original->id);
+        $this->assertEquals('es', $page->lang);
+        $this->assertEquals($title, $page->title);
+        $this->assertEquals(null, $page->published_at);
+
+        $this->assertDatabaseHas($page->getTable(), [$page->getLangKey() => 'es', 'title' => $title]);
     }
 
     /** @test */
