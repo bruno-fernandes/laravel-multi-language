@@ -13,4 +13,6 @@ class Page extends Model
     use Translatable;
 
     protected $guarded = [];
+
+    protected $excludeFieldsFromTranslation = ['published_at'];
 }

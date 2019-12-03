@@ -67,6 +67,24 @@ trait Translatable
     // }
 
     /**
+     * Determin fields to be excluded from the translation
+     *
+     * @return array
+     */
+    private function fieldsToExclude(): array
+    {
+        $exclude = [];
+        if ($this->excludeFieldsFromTranslation && is_array($this->excludeFieldsFromTranslation)) {
+            $exclude = $this->excludeFieldsFromTranslation;
+        }
+
+        return array_merge(
+            [$this->getKeyName(), $this->getLangKey(), $this->getForeignKey(), 'created_at', 'updated_at'],
+            $exclude
+        );
+    }
+
+    /**
      * Translate model to another language
      *
      * @param String $lang
@@ -75,10 +93,9 @@ trait Translatable
      */
     public function translateTo($lang, $data = [])
     {
-        $excludedFields = [$this->getKeyName(), $this->getLangKey(), $this->getForeignKey(), 'created_at', 'updated_at'];
         $newLangData = [$this->getLangKey() => $lang, $this->getForeignKey() => $this->{$this->getForeignKey()}];
-        $originalData = Arr::except($this->toArray(), $excludedFields);
-        $data = Arr::except($data, $excludedFields); // clean up passed data
+        $originalData = Arr::except($this->toArray(), $this->fieldsToExclude());
+        $data = Arr::except($data, $this->fieldsToExclude()); // clean up passed data
         $data = array_merge($originalData, $data, $newLangData);
 
         if ($this->hasTranslation($lang)) {
