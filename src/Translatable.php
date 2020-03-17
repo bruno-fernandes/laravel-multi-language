@@ -104,6 +104,8 @@ trait Translatable
 
         // TODO: add event here: model.translating
 
+        // dd($data);
+
         $translation =  self::create($data);
 
         // TODO: add event here: model.translated

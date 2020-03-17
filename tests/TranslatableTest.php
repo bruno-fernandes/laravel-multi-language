@@ -51,7 +51,7 @@ class TranslatableTest extends TestCase
     {
         $original = Page::create([
             'title' => 'English title',
-            'published_at' => '2019-12-03T07:22:29+00:00'
+            'starts_at' => "2019-12-03 13:55:07+00:00"
         ]);
 
         $title = 'Spanish title';

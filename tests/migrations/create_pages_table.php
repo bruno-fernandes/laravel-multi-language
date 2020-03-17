@@ -19,6 +19,7 @@ class CreatePagesTable extends Migration
             $table->string('lang', 6)->default('en')->index();
             $table->integer('original_id')->unsigned()->nullable()->index();
             $table->timestamp('published_at')->nullable()->index();
+            $table->timestamp('starts_at')->nullable()->index();
             $table->string('title');
             $table->timestamps();
         });
