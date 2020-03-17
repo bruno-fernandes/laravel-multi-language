@@ -8,20 +8,18 @@
     "homepage": "https://github.com/bruno-fernandes/laravel-multi-language",
     "license": "MIT",
     "type": "library",
-    "authors": [
-        {
-            "name": "Bruno Fernandes",
-            "email": "bruno@brunofernandes.com",
-            "role": "Developer"
-        }
-    ],
+    "authors": [{
+        "name": "Bruno Fernandes",
+        "email": "bruno@brunofernandes.com",
+        "role": "Developer"
+    }],
     "require": {
         "php": ">=7.1",
-        "illuminate/support": "^5.6|^5.7|^5.8|^6.0"
+        "illuminate/support": "^5.6|^5.7|^5.8|^6.0|^7.0"
     },
     "require-dev": {
         "orchestra/testbench": "3.8.*",
-        "phpunit/phpunit": "^7.0"
+        "phpunit/phpunit": "^8.5"
     },
     "autoload": {
         "psr-4": {
